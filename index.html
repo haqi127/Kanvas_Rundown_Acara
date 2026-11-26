@@ -260,14 +260,18 @@ $("dl").onclick=async()=>{
  await render();
  const s=+$("q").value,off=document.createElement("canvas");off.width=W*s;off.height=H*s;
  draw(off.getContext("2d"),s);
- off.toBlob(async blob=>{
+ off.toBlob(blob=>{
   if(!blob){m.textContent="Gagal membuat gambar. Coba kualitas HD.";return}
   const name="rundown-"+(Date.now()%100000)+".png";
-  try{
-   const d=await claude.use("downloads");
-   if(!d){m.textContent="Unduhan tidak tersedia di tampilan ini. Buka artifact di browser.";return}
-   await d.save({filename:name,data:blob});m.textContent="Tersimpan: "+off.width+" × "+off.height+" px";
-  }catch(e){m.textContent=e&&e.code==="declined"?"Unduhan dibatalkan.":"Gagal menyimpan: "+((e&&e.message)||"coba lagi")}
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download=name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  m.textContent="Tersimpan: "+off.width+" × "+off.height+" px";
  },"image/png");
 };
 
